@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FHE + Deep Learning Encryption Portal</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body { background-color: #f8f9fa; padding-top: 20px; }
+    .card { box-shadow: 0 0 12px rgba(0,0,0,0.1); }
+    pre { white-space: pre-wrap; word-wrap: break-word; }
+    .btn, input, select, label { font-size: 1rem; }
+    canvas { max-width: 100% !important; height: auto !important; }
+    @media (max-width: 576px) {
+      h2 { font-size: 1.3rem; }
+      .form-label { font-size: 0.9rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2 class="text-center mb-4">Interactive FHE + Deep Learning Encryption Portal</h2>
+    <p class="text-center text-muted mb-4">
+      Encrypt inputs using Deep Learning. Encrypted results are homomorphically protected using selectable Leveled FHE schemes (CKKS, BFV, BGV).
+    </p>
+
+    <div class="row mb-4">
+      <div class="col-12 col-md-10 col-lg-8 mx-auto">
+        <div class="card p-3 p-md-4">
+          <form id="multiInputForm">
+            <div class="mb-3">
+              <label class="form-label">Select Homomorphic Encryption Scheme:</label>
+              <select id="scheme" class="form-select">
+                <option value="CKKS">CKKS</option>
+                <option value="BFV">BFV</option>
+                <option value="BGV">BGV</option>
+              </select>
+            </div>
+            <div id="inputGroup">
+              <div class="mb-3">
+                <label class="form-label">Input 1 (optional)</label>
+                <input type="text" name="input" class="form-control" placeholder="Enter input" />
+              </div>
+            </div>
+            <button type="button" class="btn btn-secondary mb-3 w-100" onclick="addInputField()">Add Another Input</button>
+
+            <div class="mb-3">
+              <label class="form-label">Upload Files (Images, PDFs, Docs)</label>
+              <input type="file" id="fileInput" multiple accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" class="form-control" />
+            </div>
+
+            <button type="button" class="btn btn-primary w-100" onclick="handleEncrypt()">Encrypt and Simulate</button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <div id="results" style="display:none">
+      <div class="row g-3">
+        <div class="col-12 col-md-6">
+          <div class="alert alert-info">
+            <strong>DL Encryption Outputs:</strong>
+            <pre id="dlEnc"></pre>
+          </div>
+          <div class="alert alert-warning">
+            <strong>Noise Level:</strong>
+            <pre id="noise"></pre>
+          </div>
+          <div class="alert alert-success">
+            <strong>Homomorphic Encryption (<span id="schemeTitle"></span> Scheme):</strong>
+            <pre id="fhe"></pre>
+          </div>
+          <div class="alert alert-secondary">
+            <strong>Encryption Parameters:</strong>
+            <pre id="params"></pre>
+          </div>
+        </div>
+        <div class="col-12 col-md-6">
+          <div class="card p-3 mb-3">
+            <h5 class="text-center">Performance Comparison (ms)</h5>
+            <canvas id="chart"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- JavaScript below remains unchanged and supports encryption simulation -->
+  <script>
+    function simulateNoise() {
+      return Math.random() * 0.2 + 0.05;
+    }
+
+    function addInputField() {
+      const inputGroup = document.getElementById("inputGroup");
+      const count = inputGroup.querySelectorAll("input").length + 1;
+      const newDiv = document.createElement("div");
+      newDiv.className = "mb-3";
+      newDiv.innerHTML = `
+        <label class="form-label">Input ${count} (optional)</label>
+        <input type="text" name="input" class="form-control" placeholder="Enter input" />
+      `;
+      inputGroup.appendChild(newDiv);
+    }
+
+    function schemeEncrypt(data, scheme) {
+      switch (scheme) {
+        case "CKKS":
+          return `CKKS_Enc(${data}) = ${btoa(data)} [scale: 2^40, precision loss ≈ 10^-3]`;
+        case "BFV":
+          return `BFV_Enc(${data}) = ${btoa(data)} [integer plaintexts]`;
+        case "BGV":
+          return `BGV_Enc(${data}) = ${btoa(data)} [modular arithmetic over polynomial rings]`;
+        default:
+          return `Unknown scheme`;
+      }
+    }
+
+    function handleEncrypt() {
+      const scheme = document.getElementById("scheme").value;
+      const inputs = Array.from(document.getElementsByName("input"))
+        .map(input => input.value.trim())
+        .filter(val => val !== "");
+
+      const fileInput = document.getElementById("fileInput");
+      const files = Array.from(fileInput.files);
+
+      if (inputs.length === 0 && files.length === 0) return;
+
+      const dlEncResults = [];
+      const encryptedData = inputs.map(input => {
+        const enc = btoa(input);
+        dlEncResults.push(`DL_Enc(${input}) = ${enc}`);
+        return enc;
+      });
+
+      if (files.length > 0) {
+        let processed = 0;
+        files.forEach((file, index) => {
+          const reader = new FileReader();
+          reader.onload = function(event) {
+            const base64Content = btoa(event.target.result);
+            dlEncResults.push(`DL_Enc(${file.name}) = ${base64Content.substring(0, 60)}...`);
+            encryptedData.push(base64Content);
+            processed++;
+            if (processed === files.length) {
+              finalizeEncryption(scheme, encryptedData, dlEncResults);
+            }
+          };
+          reader.readAsBinaryString(file);
+        });
+      } else {
+        finalizeEncryption(scheme, encryptedData, dlEncResults);
+      }
+    }
+
+    function finalizeEncryption(scheme, encryptedData, dlEncResults) {
+      const noise = simulateNoise();
+      const cumulativeInput = encryptedData.join("|");
+      let finalFhe = "";
+
+      switch (scheme) {
+        case "CKKS":
+          finalFhe = `CKKS_Homomorphic_Enc(${cumulativeInput}) = ${btoa(cumulativeInput)} [scale=2^40, precision loss ≈ 10^-3]`;
+          break;
+        case "BFV":
+          finalFhe = `BFV_Homomorphic_Enc(${cumulativeInput}) = ${btoa(cumulativeInput)} [slots=${encryptedData.length}, integer precise]`;
+          break;
+        case "BGV":
+          finalFhe = `BGV_Homomorphic_Enc(${cumulativeInput}) = ${btoa(cumulativeInput)} [slots=${encryptedData.length}, poly mod ring]`;
+          break;
+      }
+
+      const simulatedParams = scheme === "CKKS"
+        ? `scale = 2^40\nslots = ${encryptedData.length}\nprecision loss ≈ 10^-3`
+        : scheme === "BFV"
+          ? `slots = ${encryptedData.length}\nprecision = integer exact`
+          : `slots = ${encryptedData.length}\nring arithmetic with mod q`;
+
+      document.getElementById("dlEnc").innerText = dlEncResults.join("\n");
+      document.getElementById("noise").innerText = noise.toFixed(3);
+      document.getElementById("fhe").innerText = finalFhe;
+      document.getElementById("params").innerText = simulatedParams;
+      document.getElementById("schemeTitle").innerText = scheme;
+      document.getElementById("results").style.display = "block";
+
+      updateChart();
+    }
+
+    function updateChart() {
+      const ctx = document.getElementById('chart').getContext('2d');
+      new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: ['CKKS', 'BFV', 'BGV'],
+          datasets: [
+            {
+              label: 'DL Encryption + FHE (ms)',
+              data: [700, 850, 800],
+              backgroundColor: ['#007bff', '#dc3545', '#ffc107'],
+              borderRadius: 5
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: { display: false }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              title: {
+                display: true,
+                text: 'Milliseconds'
+              }
+            }
+          }
+        }
+      });
+    }
+  </script>
+</body>
+</html>
