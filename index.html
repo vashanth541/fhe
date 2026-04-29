@@ -1,225 +1,392 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>FHE + Deep Learning Encryption Portal</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <style>
-    body { background-color: #f8f9fa; padding-top: 20px; }
-    .card { box-shadow: 0 0 12px rgba(0,0,0,0.1); }
-    pre { white-space: pre-wrap; word-wrap: break-word; }
-    .btn, input, select, label { font-size: 1rem; }
-    canvas { max-width: 100% !important; height: auto !important; }
-    @media (max-width: 576px) {
-      h2 { font-size: 1.3rem; }
-      .form-label { font-size: 0.9rem; }
-    }
-  </style>
+  <title>FHE Deep Learning — Privacy-Preserving Inference</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Exo+2:wght@300;400;600;700;800&family=Orbitron:wght@400;700;900&display=swap"
+    rel="stylesheet" />
 </head>
+
 <body>
-  <div class="container">
-    <h2 class="text-center mb-4">Interactive FHE + Deep Learning Encryption Portal</h2>
-    <p class="text-center text-muted mb-4">
-      Encrypt inputs using Deep Learning. Encrypted results are homomorphically protected using selectable Leveled FHE schemes (CKKS, BFV, BGV).
-    </p>
 
-    <div class="row mb-4">
-      <div class="col-12 col-md-10 col-lg-8 mx-auto">
-        <div class="card p-3 p-md-4">
-          <form id="multiInputForm">
-            <div class="mb-3">
-              <label class="form-label">Select Homomorphic Encryption Scheme:</label>
-              <select id="scheme" class="form-select">
-                <option value="CKKS">CKKS</option>
-                <option value="BFV">BFV</option>
-                <option value="BGV">BGV</option>
-              </select>
-            </div>
-            <div id="inputGroup">
-              <div class="mb-3">
-                <label class="form-label">Input 1 (optional)</label>
-                <input type="text" name="input" class="form-control" placeholder="Enter input" />
-              </div>
-            </div>
-            <button type="button" class="btn btn-secondary mb-3 w-100" onclick="addInputField()">Add Another Input</button>
+  <!-- Animated background grid -->
+  <div class="bg-grid"></div>
+  <div class="scan-line"></div>
 
-            <div class="mb-3">
-              <label class="form-label">Upload Files (Images, PDFs, Docs)</label>
-              <input type="file" id="fileInput" multiple accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" class="form-control" />
-            </div>
+  <!-- ═══════════════ HEADER ═══════════════ -->
+  <header class="site-header">
+    <div class="header-inner">
+      <div class="logo">
+        <span class="logo-icon">⬡</span>
+        <div class="logo-text">
+          <span class="logo-title">FHE<span class="accent">·</span>NET</span>
+          <span class="logo-sub">Privacy-Preserving Deep Learning</span>
+        </div>
+      </div>
+      <nav class="badges">
+        <span class="badge badge--green">⚡ FHE Enabled</span>
+        <span class="badge badge--blue">🔒 Dual-Layer Encryption</span>
+        <span class="badge badge--amber">🚫 Zero Plaintext</span>
+      </nav>
+    </div>
+  </header>
 
-            <button type="button" class="btn btn-primary w-100" onclick="handleEncrypt()">Encrypt and Simulate</button>
-          </form>
+  <!-- ═══════════════ HERO ═══════════════ -->
+  <section class="hero">
+    <div class="hero-text">
+      <h1>Encrypted<br /><span class="accent-text">Deep Learning</span><br />Inference</h1>
+      <p class="hero-sub">Multi-Prime RSA + CKKS Fully Homomorphic Encryption<br />— compute on ciphertext, never on
+        plaintext.</p>
+    </div>
+    <div class="paper-ref">
+      <span class="paper-label">RESEARCH PAPER</span>
+      <span class="paper-title">"Privacy-Preserving Deep Learning on Encrypted Data<br />using Multi-Prime RSA and CKKS
+        FHE"</span>
+    </div>
+  </section>
+
+  <!-- ═══════════════ WORKFLOW DIAGRAM ═══════════════ -->
+  <section class="section">
+    <h2 class="section-title">System Workflow</h2>
+    <div class="workflow">
+      <div class="wf-node wf-client">
+        <div class="wf-icon">💻</div>
+        <div class="wf-label">CLIENT</div>
+        <div class="wf-desc">Raw Input Data<br />(Vector / CSV)</div>
+      </div>
+      <div class="wf-arrow">
+        <div class="wf-arrow-line"></div>
+        <div class="wf-arrow-tag">RSA Encrypt</div>
+      </div>
+      <div class="wf-node wf-rsa">
+        <div class="wf-icon">🔑</div>
+        <div class="wf-label">MULTI-PRIME RSA</div>
+        <div class="wf-desc">3-Prime Key Gen<br />+ CRT Optimization</div>
+      </div>
+      <div class="wf-arrow">
+        <div class="wf-arrow-line"></div>
+        <div class="wf-arrow-tag">CKKS Encode</div>
+      </div>
+      <div class="wf-node wf-fhe">
+        <div class="wf-icon">⬡</div>
+        <div class="wf-label">CKKS FHE</div>
+        <div class="wf-desc">Homomorphic<br />Encoding + Encrypt</div>
+      </div>
+      <div class="wf-arrow">
+        <div class="wf-arrow-line"></div>
+        <div class="wf-arrow-tag">Encrypted NN</div>
+      </div>
+      <div class="wf-node wf-server">
+        <div class="wf-icon">🖥️</div>
+        <div class="wf-label">SERVER</div>
+        <div class="wf-desc">DL Inference on<br />Ciphertext Only</div>
+      </div>
+      <div class="wf-arrow wf-arrow-return">
+        <div class="wf-arrow-line"></div>
+        <div class="wf-arrow-tag">Decrypt Result</div>
+      </div>
+      <div class="wf-node wf-result">
+        <div class="wf-icon">✅</div>
+        <div class="wf-label">PREDICTION</div>
+        <div class="wf-desc">Decrypted Output<br />+ Confidence Score</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════ INPUT PANEL ═══════════════ -->
+  <section class="section">
+    <h2 class="section-title">Data Input</h2>
+    <div class="input-grid">
+
+      <!-- Manual Vector Input -->
+      <div class="card">
+        <div class="card-header">
+          <span class="card-icon">📊</span>
+          <h3>Manual Vector Input</h3>
+        </div>
+        <p class="card-desc">Enter comma-separated numerical values (e.g. ECG signal features)</p>
+        <textarea id="vectorInput" class="vector-input"
+          placeholder="0.42, -0.17, 0.88, 0.33, -0.55, 0.71, 0.12, -0.44, 0.67, 0.29, -0.81, 0.55"></textarea>
+        <button class="btn btn--secondary" id="sampleBtn">Load Sample ECG</button>
+      </div>
+
+      <!-- CSV Upload -->
+      <div class="card">
+        <div class="card-header">
+          <span class="card-icon">📁</span>
+          <h3>CSV File Upload</h3>
+        </div>
+        <p class="card-desc">Upload a CSV dataset for batch encrypted inference</p>
+        <div class="upload-zone" id="uploadZone">
+          <div class="upload-icon">⬆</div>
+          <p>Drag & drop CSV here<br /><span>or click to browse</span></p>
+          <input type="file" id="csvFile" accept=".csv" />
+        </div>
+        <div id="fileInfo" class="file-info hidden"></div>
+      </div>
+
+      <!-- Configuration -->
+      <div class="card">
+        <div class="card-header">
+          <span class="card-icon">⚙️</span>
+          <h3>Encryption Parameters</h3>
+        </div>
+        <div class="config-grid">
+          <div class="config-item">
+            <label>RSA Prime Count</label>
+            <select id="primeCount">
+              <option value="3" selected>3 Primes (Default)</option>
+              <option value="4">4 Primes (High Security)</option>
+            </select>
+          </div>
+          <div class="config-item">
+            <label>CKKS Poly Degree</label>
+            <select id="polyDegree">
+              <option value="4096">4096</option>
+              <option value="8192" selected>8192 (Recommended)</option>
+              <option value="16384">16384 (Max Security)</option>
+            </select>
+          </div>
+          <div class="config-item">
+            <label>NN Hidden Units</label>
+            <select id="hiddenUnits">
+              <option value="16">16</option>
+              <option value="32" selected>32 (Default)</option>
+              <option value="64">64</option>
+            </select>
+          </div>
+          <div class="config-item">
+            <label>Activation Function</label>
+            <select id="activation">
+              <option value="poly" selected>Poly: 0.5x + 0.125x³</option>
+              <option value="poly2">Poly: x + 0.1x² - 0.01x⁴</option>
+            </select>
+          </div>
         </div>
       </div>
     </div>
 
-    <div id="results" style="display:none">
-      <div class="row g-3">
-        <div class="col-12 col-md-6">
-          <div class="alert alert-info">
-            <strong>DL Encryption Outputs:</strong>
-            <pre id="dlEnc"></pre>
+    <!-- Run Button -->
+    <div class="run-section">
+      <button class="btn btn--primary" id="runBtn">
+        <span class="btn-icon">🔒</span>
+        Run Encrypted Inference
+      </button>
+      <div class="run-note">All computation performed on encrypted ciphertext — server never sees plaintext</div>
+    </div>
+  </section>
+
+  <!-- ═══════════════ PROGRESS / LOGS ═══════════════ -->
+  <section class="section" id="progressSection" style="display:none;">
+    <h2 class="section-title">Execution Pipeline</h2>
+    <div class="pipeline-grid">
+
+      <!-- Stage tracker -->
+      <div class="card stage-card">
+        <h3 class="card-title-sm">Pipeline Stages</h3>
+        <div class="stages" id="stageList">
+          <div class="stage" id="stage-preprocess">
+            <div class="stage-dot"></div>
+            <div class="stage-info">
+              <span class="stage-name">Data Preprocessing</span>
+              <span class="stage-status">Waiting…</span>
+            </div>
           </div>
-          <div class="alert alert-warning">
-            <strong>Noise Level:</strong>
-            <pre id="noise"></pre>
+          <div class="stage" id="stage-keygen">
+            <div class="stage-dot"></div>
+            <div class="stage-info">
+              <span class="stage-name">RSA Key Generation (3-Prime)</span>
+              <span class="stage-status">Waiting…</span>
+            </div>
           </div>
-          <div class="alert alert-success">
-            <strong>Homomorphic Encryption (<span id="schemeTitle"></span> Scheme):</strong>
-            <pre id="fhe"></pre>
+          <div class="stage" id="stage-rsa">
+            <div class="stage-dot"></div>
+            <div class="stage-info">
+              <span class="stage-name">Multi-Prime RSA Encryption</span>
+              <span class="stage-status">Waiting…</span>
+            </div>
           </div>
-          <div class="alert alert-secondary">
-            <strong>Encryption Parameters:</strong>
-            <pre id="params"></pre>
+          <div class="stage" id="stage-ckks">
+            <div class="stage-dot"></div>
+            <div class="stage-info">
+              <span class="stage-name">CKKS FHE Encoding & Encryption</span>
+              <span class="stage-status">Waiting…</span>
+            </div>
           </div>
-        </div>
-        <div class="col-12 col-md-6">
-          <div class="card p-3 mb-3">
-            <h5 class="text-center">Performance Comparison (ms)</h5>
-            <canvas id="chart"></canvas>
+          <div class="stage" id="stage-server">
+            <div class="stage-dot"></div>
+            <div class="stage-info">
+              <span class="stage-name">Encrypted Neural Network Inference</span>
+              <span class="stage-status">Waiting…</span>
+            </div>
+          </div>
+          <div class="stage" id="stage-decrypt">
+            <div class="stage-dot"></div>
+            <div class="stage-info">
+              <span class="stage-name">CKKS Decryption</span>
+              <span class="stage-status">Waiting…</span>
+            </div>
+          </div>
+          <div class="stage" id="stage-rsa-dec">
+            <div class="stage-dot"></div>
+            <div class="stage-info">
+              <span class="stage-name">RSA Decryption (CRT)</span>
+              <span class="stage-status">Waiting…</span>
+            </div>
           </div>
         </div>
       </div>
+
+      <!-- Live log terminal -->
+      <div class="card log-card">
+        <div class="log-header">
+          <h3 class="card-title-sm">🖥 Live Execution Log</h3>
+          <button class="btn-clear" id="clearLog">Clear</button>
+        </div>
+        <div class="log-terminal" id="logTerminal">
+          <div class="log-line log-info">$ Awaiting encrypted inference request...</div>
+        </div>
+      </div>
     </div>
-  </div>
+  </section>
 
-  <!-- JavaScript below remains unchanged and supports encryption simulation -->
-  <script>
-    function simulateNoise() {
-      return Math.random() * 0.2 + 0.05;
-    }
+  <!-- ═══════════════ RESULTS ═══════════════ -->
+  <section class="section" id="resultsSection" style="display:none;">
+    <h2 class="section-title">Inference Results</h2>
+    <div class="results-grid">
 
-    function addInputField() {
-      const inputGroup = document.getElementById("inputGroup");
-      const count = inputGroup.querySelectorAll("input").length + 1;
-      const newDiv = document.createElement("div");
-      newDiv.className = "mb-3";
-      newDiv.innerHTML = `
-        <label class="form-label">Input ${count} (optional)</label>
-        <input type="text" name="input" class="form-control" placeholder="Enter input" />
-      `;
-      inputGroup.appendChild(newDiv);
-    }
+      <!-- Main prediction -->
+      <div class="card result-main">
+        <div class="result-badge">ENCRYPTED PREDICTION</div>
+        <div class="result-category" id="resultCategory">—</div>
+        <div class="result-confidence" id="resultConfidence">—</div>
+        <div class="result-label">Confidence Score</div>
+      </div>
 
-    function schemeEncrypt(data, scheme) {
-      switch (scheme) {
-        case "CKKS":
-          return `CKKS_Enc(${data}) = ${btoa(data)} [scale: 2^40, precision loss ≈ 10^-3]`;
-        case "BFV":
-          return `BFV_Enc(${data}) = ${btoa(data)} [integer plaintexts]`;
-        case "BGV":
-          return `BGV_Enc(${data}) = ${btoa(data)} [modular arithmetic over polynomial rings]`;
-        default:
-          return `Unknown scheme`;
-      }
-    }
+      <!-- Metrics -->
+      <div class="metrics-grid">
+        <div class="metric-card">
+          <div class="metric-icon">⏱</div>
+          <div class="metric-value" id="metricLatency">—</div>
+          <div class="metric-label">Total Latency</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-icon">🔐</div>
+          <div class="metric-value" id="metricCipherSize">—</div>
+          <div class="metric-label">Ciphertext Size</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-icon">📈</div>
+          <div class="metric-value" id="metricIntegrity">—</div>
+          <div class="metric-label">Data Integrity</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-icon">🔇</div>
+          <div class="metric-value" id="metricNoise">—</div>
+          <div class="metric-label">Noise Budget</div>
+        </div>
+      </div>
 
-    function handleEncrypt() {
-      const scheme = document.getElementById("scheme").value;
-      const inputs = Array.from(document.getElementsByName("input"))
-        .map(input => input.value.trim())
-        .filter(val => val !== "");
+      <!-- Security status -->
+      <div class="card security-card">
+        <h3 class="card-title-sm">Security Guarantees</h3>
+        <div class="security-items" id="securityItems">
+          <div class="sec-item">
+            <span class="sec-icon sec-green">✓</span>
+            <span>Data never exposed in plaintext</span>
+          </div>
+          <div class="sec-item">
+            <span class="sec-icon sec-green">✓</span>
+            <span>Dual-layer encryption active (RSA + CKKS)</span>
+          </div>
+          <div class="sec-item">
+            <span class="sec-icon sec-green">✓</span>
+            <span>Secure inference pipeline — server saw only ciphertext</span>
+          </div>
+          <div class="sec-item">
+            <span class="sec-icon sec-green">✓</span>
+            <span>Zero-knowledge style processing</span>
+          </div>
+          <div class="sec-item">
+            <span class="sec-icon sec-green">✓</span>
+            <span>CRT-optimized RSA decryption</span>
+          </div>
+        </div>
+      </div>
 
-      const fileInput = document.getElementById("fileInput");
-      const files = Array.from(fileInput.files);
+      <!-- Breakdown -->
+      <div class="card breakdown-card">
+        <h3 class="card-title-sm">Latency Breakdown</h3>
+        <div class="breakdown-bars" id="breakdownBars"></div>
+      </div>
+    </div>
 
-      if (inputs.length === 0 && files.length === 0) return;
+    <!-- Charts -->
+    <div class="charts-grid">
+      <div class="card chart-card">
+        <h3 class="card-title-sm">Latency vs Computation Stage</h3>
+        <canvas id="latencyChart"></canvas>
+      </div>
+      <div class="card chart-card">
+        <h3 class="card-title-sm">Ciphertext Size Growth</h3>
+        <canvas id="ciphertextChart"></canvas>
+      </div>
+      <div class="card chart-card">
+        <h3 class="card-title-sm">Noise Budget Consumption</h3>
+        <canvas id="noiseChart"></canvas>
+      </div>
+    </div>
 
-      const dlEncResults = [];
-      const encryptedData = inputs.map(input => {
-        const enc = btoa(input);
-        dlEncResults.push(`DL_Enc(${input}) = ${enc}`);
-        return enc;
-      });
+    <!-- Crypto keys display -->
+    <div class="card key-card">
+      <h3 class="card-title-sm">Cryptographic Key Summary</h3>
+      <div class="key-grid" id="keyDisplay"></div>
+    </div>
 
-      if (files.length > 0) {
-        let processed = 0;
-        files.forEach((file, index) => {
-          const reader = new FileReader();
-          reader.onload = function(event) {
-            const base64Content = btoa(event.target.result);
-            dlEncResults.push(`DL_Enc(${file.name}) = ${base64Content.substring(0, 60)}...`);
-            encryptedData.push(base64Content);
-            processed++;
-            if (processed === files.length) {
-              finalizeEncryption(scheme, encryptedData, dlEncResults);
-            }
-          };
-          reader.readAsBinaryString(file);
-        });
-      } else {
-        finalizeEncryption(scheme, encryptedData, dlEncResults);
-      }
-    }
+    <!-- Download button -->
+    <div class="download-section">
+      <button class="btn btn--primary" id="downloadBtn">⬇ Download Result Report</button>
+      <button class="btn btn--secondary" id="resetBtn">↺ Run New Inference</button>
+    </div>
+  </section>
 
-    function finalizeEncryption(scheme, encryptedData, dlEncResults) {
-      const noise = simulateNoise();
-      const cumulativeInput = encryptedData.join("|");
-      let finalFhe = "";
+  <!-- ═══════════════ FOOTER ═══════════════ -->
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <div class="footer-col">
+        <span class="footer-title">FHE·NET</span>
+        <span class="footer-desc">Privacy-Preserving Deep Learning prototype<br />implementing Multi-Prime RSA + CKKS
+          FHE</span>
+      </div>
+      <div class="footer-col">
+        <span class="footer-title">Cryptography</span>
+        <span class="footer-desc">Multi-Prime RSA (3+ primes, CRT)<br />CKKS FHE (polynomial arithmetic)<br />RNS + NTT
+          simulation</span>
+      </div>
+      <div class="footer-col">
+        <span class="footer-title">Neural Network</span>
+        <span class="footer-desc">Polynomial activation: 0.5x + 0.125x³<br />Linear layers on ciphertext<br />Encrypted
+          weight operations</span>
+      </div>
+      <div class="footer-col">
+        <span class="footer-title">Note</span>
+        <span class="footer-desc">Cryptographic operations are<br />accurately simulated in JavaScript<br />matching the
+          research paper workflow</span>
+      </div>
+    </div>
+    <div class="footer-bottom">© 2025 FHE·NET — Research Prototype | Privacy-Preserving Deep Learning</div>
+  </footer>
 
-      switch (scheme) {
-        case "CKKS":
-          finalFhe = `CKKS_Homomorphic_Enc(${cumulativeInput}) = ${btoa(cumulativeInput)} [scale=2^40, precision loss ≈ 10^-3]`;
-          break;
-        case "BFV":
-          finalFhe = `BFV_Homomorphic_Enc(${cumulativeInput}) = ${btoa(cumulativeInput)} [slots=${encryptedData.length}, integer precise]`;
-          break;
-        case "BGV":
-          finalFhe = `BGV_Homomorphic_Enc(${cumulativeInput}) = ${btoa(cumulativeInput)} [slots=${encryptedData.length}, poly mod ring]`;
-          break;
-      }
-
-      const simulatedParams = scheme === "CKKS"
-        ? `scale = 2^40\nslots = ${encryptedData.length}\nprecision loss ≈ 10^-3`
-        : scheme === "BFV"
-          ? `slots = ${encryptedData.length}\nprecision = integer exact`
-          : `slots = ${encryptedData.length}\nring arithmetic with mod q`;
-
-      document.getElementById("dlEnc").innerText = dlEncResults.join("\n");
-      document.getElementById("noise").innerText = noise.toFixed(3);
-      document.getElementById("fhe").innerText = finalFhe;
-      document.getElementById("params").innerText = simulatedParams;
-      document.getElementById("schemeTitle").innerText = scheme;
-      document.getElementById("results").style.display = "block";
-
-      updateChart();
-    }
-
-    function updateChart() {
-      const ctx = document.getElementById('chart').getContext('2d');
-      new Chart(ctx, {
-        type: 'bar',
-        data: {
-          labels: ['CKKS', 'BFV', 'BGV'],
-          datasets: [
-            {
-              label: 'DL Encryption + FHE (ms)',
-              data: [700, 850, 800],
-              backgroundColor: ['#007bff', '#dc3545', '#ffc107'],
-              borderRadius: 5
-            }
-          ]
-        },
-        options: {
-          responsive: true,
-          plugins: {
-            legend: { display: false }
-          },
-          scales: {
-            y: {
-              beginAtZero: true,
-              title: {
-                display: true,
-                text: 'Milliseconds'
-              }
-            }
-          }
-        }
-      });
-    }
-  </script>
+  <!-- Scripts -->
+  <script src="crypto.js"></script>
+  <script src="model.js"></script>
+  <script src="charts.js"></script>
+  <script src="app.js"></script>
 </body>
+
 </html>
